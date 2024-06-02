@@ -19,36 +19,30 @@ async def on_ready():
 
     print(f">> Bot is online, as {bot.user} <<")
 
-@bot.tree.command(name = "load", description = "Load a cog")
-@app_commands.describe(cog = "The cog to load")
-async def load(interaction: discord.Interaction, cog: str):
+@bot.hybrid_command()
+async def load(ctx, cog: str):
     await bot.load_extension(f"cogs.{cog}")
-    await interaction.response.send_message(f"Successfullu loaded {cog}")
+    await ctx.send(f"Successfully loaded {cog}")
 
-@bot.tree.command(name = "reload", description = "Reload a cog")
-@app_commands.describe(cog = "The cog to reload")
-async def reload(interaction: discord.Interaction, cog: str):
+@bot.hybrid_command()
+async def reload(ctx, cog: str):
     await bot.reload_extension(f"cogs.{cog}")
-    await interaction.response.send_message(f"Successfullu reloaded {cog}")
+    await ctx.send(f"Successfully reloaded {cog}")
 
-@bot.tree.command(name = "unload", description = "Unload a cog")
-@app_commands.describe(cog = "The cog to unload")
-async def unload(interaction: discord.Interaction, cog: str):
+@bot.hybrid_command()
+async def unload(ctx, cog: str):
     await bot.unload_extension(f"cogs.{cog}")
-    await interaction.response.send_message(f"Successfullu reloaded {cog}")
+    await ctx.send(f"Successfully unloaded {cog}")
 
-@bot.command()
-async def sync(ctx, guild_id = None):
-    if ctx.author.id == config["YUYU"]:
-        commands = await bot.tree.sync(guild = guild_id)
-        output = "\n".join(commands)
-        await ctx.send("Sucessfully sync the following commands\n" + output)
-    else:
-        ctx.send("You're not permitted to do so.")
+@bot.hybrid_command()
+async def sync(ctx):
+    commands = await bot.tree.sync()
+    output = "\n".join([item.name for item in commands])
+    await ctx.send("Sucessfully sync the following commands\n" + output)
 
     
 
 
 
 if __name__ == "__main__":
-    bot.run(config["TOKEN2"])
+    bot.run(config["TOKEN"])

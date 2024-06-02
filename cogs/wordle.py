@@ -6,7 +6,7 @@ from core import Cog_Extension
 from random import randint
 from bs4 import BeautifulSoup
 import requests as rq
-from discord import app_commands
+from discord import Interaction, app_commands
 from config import *
 
 class Wordle(Cog_Extension):
@@ -38,7 +38,7 @@ class Wordle(Cog_Extension):
         self.game_dict = dict()
 
 
-    @commands.command()
+    @commands.hybrid_command()
     async def wordle(self, ctx):
         user_id = ctx.author.id
         if not user_id in self.game_dict:
@@ -48,51 +48,23 @@ class Wordle(Cog_Extension):
             await ctx.send("The current game has not ended yet, use **$end** to end the current game.")
         
         
-    @commands.command()
+    @commands.hybrid_command()
     async def guess(self, ctx, guesses: str):
         user_id = ctx.author.id
         if not user_id in self.game_dict:
             await ctx.send("The game hasn't started yet. Consider using **!wordle** to start a game.")
         result = self.game_dict[user_id].guess(guesses)
 
-        await ctx.message.delete()
-
         await ctx.send(result[1])
         if result[0] == GAME_OVER:
             self.game_dict.pop(user_id)
 
-    @commands.command()
-    async def modify(self, ctx, answer: str):
-        user_id = ctx.author.id
-        if not user_id in self.game_dict:
-            await ctx.send("The game hasn't started yet. Consider using **!wordle** to start a game.")
-            return
-        if answer not in Wordle.word_list:
-            await ctx.send(f"**{answer}** is not in the word list!")
-        else:
-            self.game_dict[user_id].answer = answer
-
-            for letter in self.game_dict[user_id].answer:
-                if not letter in self.game_dict[user_id].word_composition:
-                    self.game_dict[user_id].word_composition[letter] = 1
-                else:
-                    self.game_dict[user_id].word_composition[letter] += 1
-
-
-
-            await ctx.send(f"The answer has been modified to **{answer}**")
-
-    @commands.command()
+    @commands.hybrid_command()
     async def end(self, ctx):
         user_id = ctx.author.id        
         answer = self.game_dict[user_id].answer
         self.game_dict.pop(user_id)
         await ctx.send(f"The current game has been terminated, the answer is **{answer}**")
-    
-    @commands.command()
-    async def gimme(self, ctx):
-        # Something like a cheat code, will be removed after things are finished
-        await ctx.send(self.game_dict[ctx.author.id].answer)
 
     
 class WordleGame():
